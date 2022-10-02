@@ -2,7 +2,7 @@ const url = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData
 
 const height = 600;
 const width = 1200;
-const padding = 40;
+const padding = 70;
 
 const baseTemperatureDOM = document.querySelector("#baseTemperature");
 const svg = d3.select("svg");
@@ -22,7 +22,7 @@ const generateScale = (arr) => {
         return item.year;
       }),
       d3.max(arr, (item) => {
-        return item.year;
+        return item.year + 1;
       }),
     ])
     .range([padding, width - padding]);
@@ -35,7 +35,8 @@ const generateScale = (arr) => {
 
 const generateAxis = () => {
   let xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
-  let yAxis = d3.axisLeft(yScale);
+  //timeFormat method %B is to spell the whold month as string
+  let yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat("%B"));
 
   svg
     .append("g")
