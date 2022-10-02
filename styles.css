@@ -1,3 +1,9 @@
 #canvas {
-    background-color: honeydew;
+  background-color: honeydew;
+}
+
+#tooltip {
+  visibility: hidden;
+  height: auto;
+  width: auto;
 }

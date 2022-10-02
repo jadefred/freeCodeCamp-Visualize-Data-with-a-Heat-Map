@@ -6,6 +6,7 @@ const padding = 70;
 
 const baseTemperatureDOM = document.querySelector("#baseTemperature");
 const svg = d3.select("svg");
+const tooltip = d3.select("#tooltip");
 let baseTemperature;
 let xScale;
 let yScale;
@@ -103,6 +104,44 @@ const drawCells = (arr) => {
     })
     .attr("x", (item) => {
       return xScale(item.year);
+    })
+    //hover the cell will make the tooltip div visible and show the date of data
+    .on("mouseover", (item) => {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      tooltip.transition().style("visibility", "visible");
+      //round up temperature to 2 decimal place and show month in string
+      tooltip.html(
+        item.year +
+          " - " +
+          monthNames[item.month - 1] +
+          "<br/>" +
+          "Temperature: " +
+          Math.round((baseTemperature + item.variance) * 100) / 100 +
+          "°C" +
+          "<br/>" +
+          "Variance: " +
+          item.variance
+      );
+
+      tooltip.attr("data-year", item.year);
+    })
+    //change visibility back to hidden when mouse is not on the cell
+    .on("mouseout", (item) => {
+      tooltip.transition().style("visibility", "hidden");
     });
 };
 
@@ -118,6 +157,7 @@ async function getData() {
   generateScale(data.monthlyVariance);
   generateAxis();
   drawCells(data.monthlyVariance);
+  generateLegend(data.monthlyVariance);
 }
 
 getData();
