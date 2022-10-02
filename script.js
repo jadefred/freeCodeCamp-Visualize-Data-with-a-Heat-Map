@@ -2,7 +2,7 @@ const url = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData
 
 const height = 600;
 const width = 1200;
-const padding = 70;
+const padding = 100;
 
 const baseTemperatureDOM = document.querySelector("#baseTemperature");
 const svg = d3.select("svg");
