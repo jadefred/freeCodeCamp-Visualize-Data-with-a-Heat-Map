@@ -4,8 +4,9 @@ const height = 600;
 const width = 1200;
 const padding = 40;
 
-const baseTemperature = document.querySelector("#baseTemperature");
+const baseTemperatureDOM = document.querySelector("#baseTemperature");
 const svg = d3.select("svg");
+let baseTemperature;
 let xScale;
 let yScale;
 
@@ -28,14 +29,7 @@ const generateScale = (arr) => {
 
   yScale = d3
     .scaleTime()
-    .domain([
-      d3.min(arr, (item) => {
-        return item.month;
-      }),
-      d3.max(arr, (item) => {
-        return item.month;
-      }),
-    ])
+    .domain([new Date(0, 0, 0, 0, 0, 0, 0), new Date(0, 12, 0, 0, 0, 0, 0)])
     .range([padding, height - padding]);
 };
 
@@ -56,16 +50,73 @@ const generateAxis = () => {
     .attr("transform", "translate(" + padding + ", 0)");
 };
 
+const drawCells = (arr) => {
+  svg
+    .selectAll("rect")
+    .data(arr)
+    .enter()
+    .append("rect")
+    .attr("class", "cell")
+    //fill the cells depends on the range of variance
+    .attr("fill", (item) => {
+      let variance = item["variance"];
+      if (variance <= -1) {
+        return "SteelBlue";
+      } else if (variance <= 0) {
+        return "LightSteelBlue";
+      } else if (variance <= 1) {
+        return "Orange";
+      } else {
+        return "Crimson";
+      }
+    })
+    .attr("data-month", (item) => {
+      return item.month - 1;
+    })
+    .attr("data-year", (item) => {
+      return item.year;
+    })
+    //take variance plus base temperature
+    .attr("data-temp", (item) => {
+      return baseTemperature + item.variance;
+    })
+    //total height minus 2 sides of padding and divided by 12
+    .attr("height", () => {
+      return (height - 2 * padding) / 12;
+    })
+    //first take away both side of padding, then divide the width by the total number of years
+    .attr("width", () => {
+      let numberOfYear =
+        d3.max(arr, (item) => {
+          return item.year;
+        }) -
+        d3.min(arr, (item) => {
+          return item.year;
+        });
+
+      return (width - padding * 2) / numberOfYear;
+    })
+    //js start counting from 0, so month need to be minus 1
+    .attr("y", (item) => {
+      return yScale(new Date(0, item.month - 1, 0, 0, 0, 0, 0));
+    })
+    .attr("x", (item) => {
+      return xScale(item.year);
+    });
+};
+
 async function getData() {
   const response = await fetch(url);
   const data = await response.json();
   console.log(data);
   //update dom of base temperature
-  baseTemperature.textContent = data.baseTemperature;
-  
+  baseTemperatureDOM.textContent = data.baseTemperature;
+  baseTemperature = data.baseTemperature;
+
   drawCanvas();
   generateScale(data.monthlyVariance);
   generateAxis();
+  drawCells(data.monthlyVariance);
 }
 
 getData();
